@@ -5,15 +5,21 @@ require 'open-uri'
 class ComicRetriever
   CONFIG_URL = './comics.yaml'
   attr_accessor :config, :comics
+  def initialize
+    $running_threads = 0
+  end
   def config
     return @config if @config
     return @config = YAML.from_file(CONFIG_URL) if File.exist?(CONFIG_URL)
     @config = {
       :comics => {
         :QuestionableContent => {
-          :url => "http://www.questionablecontent.net",
           :last_saved_id => 1615,
           :storage_path => File.expand_path("~/Pictures/QuestionableContent/"),
+        },
+        :LfgComic => {
+          :last_saved_id => 318,
+          :storage_path => File.expand_path("~/Pictures/LFGComic/"),
         },
       },
     }
@@ -43,26 +49,52 @@ class Comic
   end
 
   def retrieve_comic(comic_id)
-    `wget -P #{storage_path} #{image_url(comic_id)}`
+    if $running_threads >= 20
+      sleep 20
+      return retrieve_comic(comic_id)
+    end
+    Thread.new{
+      $running_threads += 1
+      `wget -P #{storage_path} #{image_url(comic_id)}`
+      $running_threads -= 1
+    }
   end
 
   def get_all_since_last
-    (last_saved_id..latest_id).each do |comic_id|
+    ((last_saved_id+1)..latest_id).each do |comic_id|
       retrieve_comic(comic_id)
     end
   end
 end
 
 class QuestionableContent < Comic
+  BASE_URL = "http://www.questionablecontent.net"
+  LATEST_URL = BASE_URL
   def image_url(comic_id)
-    "#{url}/comics/#{comic_id}.png"
+    File.join(BASE_URL,'comics',"#{comic_id}.png")
   end
   
   def get_latest_id
-    doc = Nokogiri::HTML(open(url))
-    doc.css('#strip').first['src'].sub(File.join(url,'comics/'),'').sub('.png','').to_i
+    doc = Nokogiri::HTML(open(LATEST_URL))
+    doc.css('#strip').first['src'].sub(File.join(BASE_URL,'comics/'),'').sub('.png','').to_i
   end
 end
 
+class LfgComic < Comic
+  BASE_URL = "http://www.lfgcomic.com"
+  LATEST_URL = "http://www.lfgcomic.com/page/latest"
+  def image_url(comic_id)
+    File.join(BASE_URL,'comics',"lfg#{comic_id}.gif")
+  end
+
+  def get_latest_id
+    doc = Nokogiri::HTML(open(LATEST_URL))
+    doc.css('#comic/img').first['src'].sub('/comics/lfg','').sub('.gif','').to_i
+  end
+end
 rt = ComicRetriever.new
 rt.retrieve_all
+while $running_threads > 0 do
+  puts $running_threads
+  sleep 1
+end
