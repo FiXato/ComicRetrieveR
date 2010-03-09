@@ -14,11 +14,11 @@ class ComicRetriever
     @config = {
       :comics => {
         :QuestionableContent => {
-          :last_saved_id => 1615,
+          :last_saved_id => 1617,
           :storage_path => File.expand_path("~/Pictures/QuestionableContent/"),
         },
         :LfgComic => {
-          :last_saved_id => 318,
+          :last_saved_id => 337,
           :storage_path => File.expand_path("~/Pictures/LFGComic/"),
         },
       },
