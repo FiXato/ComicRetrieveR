@@ -12,7 +12,7 @@ class Comic
 
   def retrieve_comic(comic_id)
     image_urls(comic_id).each do |url|
-      `wget #{'-b' if wget_background} -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
+      `wget #{'-b -q' if wget_background} -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
     end
   end
 
