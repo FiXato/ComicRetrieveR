@@ -26,11 +26,11 @@ class ComicRetriever
           :storage_path => File.expand_path("~/Pictures/CADComic/"),
         },
         :FreeFallComic => {
-          :last_saved_id => 418,
+          :last_saved_id => 1854,
           :storage_path => File.expand_path("~/Pictures/FreeFall/"),
         },
         :MyextralifeComic => {
-          :last_saved_id => 0,
+          :last_saved_id => "2010-03-09",
           :storage_path => File.expand_path("~/Pictures/MyExtraLife/"),
         },
       },
