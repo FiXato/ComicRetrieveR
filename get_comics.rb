@@ -123,7 +123,7 @@ class CadComic < Comic
   private
   def get_episodes_from_archive(year='')
     doc = Nokogiri::HTML(open(File.join(ARCHIVE_URL,year.to_s)))
-    doc.css(".post/a").map{|a|a[:href].sub('/cad/','')}
+    doc.css(".post/a").map{|a|a[:href].sub('/cad/','').to_i}
   end
 end
 
