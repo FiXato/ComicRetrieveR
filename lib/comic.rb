@@ -11,8 +11,13 @@ class Comic
   end
 
   def retrieve_comic(comic_id)
-    url = image_url(comic_id)
-    `wget #{'-b' if wget_background} -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
+    image_urls(comic_id).each do |url|
+      `wget #{'-b' if wget_background} -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
+    end
+  end
+
+  def image_urls(comic_id)
+    [image_url(comic_id)]
   end
 
   def get_all_ids_since_last_saved
