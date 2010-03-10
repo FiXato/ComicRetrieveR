@@ -4,6 +4,7 @@ require './lib/lfg_comic'
 require './lib/cad_comic'
 require './lib/free_fall_comic'
 require './lib/myextralife_comic'
+require './lib/xkcd_comic'
 
 class ComicRetriever
   CONFIG_URL = './comics.yaml'
@@ -22,7 +23,7 @@ class ComicRetriever
           :storage_path => File.expand_path("~/Pictures/LFGComic/"),
         },
         :CadComic => {
-          :last_saved_id => 20100308,
+          :last_saved_id => 20100310,
           :storage_path => File.expand_path("~/Pictures/CADComic/"),
         },
         :FreeFallComic => {
@@ -32,6 +33,10 @@ class ComicRetriever
         :MyextralifeComic => {
           :last_saved_id => "2010-03-09",
           :storage_path => File.expand_path("~/Pictures/MyExtraLife/"),
+        },
+        :XkcdComic => {
+          :last_saved_id => 712,
+          :storage_path => File.expand_path("~/Pictures/Xkcd/"),
         },
       },
     }
