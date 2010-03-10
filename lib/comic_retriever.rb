@@ -5,6 +5,7 @@ require './lib/cad_comic'
 require './lib/free_fall_comic'
 require './lib/myextralife_comic'
 require './lib/xkcd_comic'
+require './lib/order_of_the_stick_comic'
 
 class ComicRetriever
   CONFIG_URL = './comics.yaml'
@@ -37,6 +38,10 @@ class ComicRetriever
         :XkcdComic => {
           :last_saved_id => 712,
           :storage_path => File.expand_path("~/Pictures/Xkcd/"),
+        },
+        :OrderOfTheStickComic => {
+          :last_saved_id => 705,
+          :storage_path => File.expand_path("~/Pictures/OotS/"),
         },
       },
     }
