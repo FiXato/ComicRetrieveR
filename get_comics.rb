@@ -5,9 +5,6 @@ require 'open-uri'
 class ComicRetriever
   CONFIG_URL = './comics.yaml'
   attr_accessor :config, :comics
-  def initialize
-    $running_threads = 0
-  end
   def config
     return @config if @config
     return @config = YAML.from_file(CONFIG_URL) if File.exist?(CONFIG_URL)
@@ -53,16 +50,8 @@ class Comic
   end
 
   def retrieve_comic(comic_id)
-    if $running_threads >= 20
-      sleep 20
-      return retrieve_comic(comic_id)
-    end
-    Thread.new{
-      $running_threads += 1
-      url = image_url(comic_id)
-      `wget -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
-      $running_threads -= 1
-    }
+    url = image_url(comic_id)
+    `wget -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
   end
 
   def get_all_ids_since_last_saved
@@ -135,7 +124,3 @@ class CadComic < Comic
 end
 rt = ComicRetriever.new
 rt.retrieve_all
-while $running_threads > 0 do
-  puts $running_threads
-  sleep 1
-end
