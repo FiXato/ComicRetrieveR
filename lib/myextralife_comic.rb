@@ -21,10 +21,10 @@ class MyextralifeComic < Comic
     until episodes.include?(last_saved_id)
       older_episodes,year = get_episodes_from_archive(year - 1)
       break if older_episodes == []
-      episodes = older_episodes + episodes
+      episodes += older_episodes
     end
     return episodes unless episodes.include?(last_saved_id)
-    episodes[(episodes.index(last_saved_id)+1)..-1]
+    episodes[0...episodes.index(last_saved_id)]
   end
 
   private

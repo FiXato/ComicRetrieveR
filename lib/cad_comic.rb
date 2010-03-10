@@ -18,10 +18,10 @@ class CadComic < Comic
       year = episodes.first.to_s[0,4].to_i
       older_episodes = get_episodes_from_archive(year - 1)
       break if older_episodes == []
-      episodes = older_episodes + episodes
+      episodes += older_episodes
     end
     return episodes unless episodes.include?(last_saved_id)
-    episodes[(episodes.index(last_saved_id)+1)..-1]
+    episodes[0...episodes.index(last_saved_id)]
   end
 
   private
