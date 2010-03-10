@@ -14,12 +14,16 @@ class ComicRetriever
     @config = {
       :comics => {
         :QuestionableContent => {
-          :last_saved_id => 1617,
+          :last_saved_id => 1618,
           :storage_path => File.expand_path("~/Pictures/QuestionableContent/"),
         },
         :LfgComic => {
           :last_saved_id => 337,
           :storage_path => File.expand_path("~/Pictures/LFGComic/"),
+        },
+        :CadComic => {
+          :last_saved_id => 20100308,
+          :storage_path => File.expand_path("~/Pictures/CADComic/"),
         },
       },
     }
@@ -55,13 +59,18 @@ class Comic
     end
     Thread.new{
       $running_threads += 1
-      `wget -P #{storage_path} #{image_url(comic_id)}`
+      url = image_url(comic_id)
+      `wget -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
       $running_threads -= 1
     }
   end
 
+  def get_all_ids_since_last_saved
+    ((last_saved_id+1)..latest_id)
+  end
+
   def get_all_since_last
-    ((last_saved_id+1)..latest_id).each do |comic_id|
+    get_all_ids_since_last_saved.each do |comic_id|
       retrieve_comic(comic_id)
     end
   end
@@ -90,6 +99,38 @@ class LfgComic < Comic
   def get_latest_id
     doc = Nokogiri::HTML(open(LATEST_URL))
     doc.css('#comic/img').first['src'].sub('/comics/lfg','').sub('.gif','').to_i
+  end
+end
+
+class CadComic < Comic
+  BASE_URL = "http://www.cad-comic.com"
+  LATEST_URL = "http://www.cad-comic.com/cad/"
+  ARCHIVE_URL = "http://www.cad-comic.com/cad/archive"
+  def image_url(comic_id)
+    File.join(BASE_URL,'comics/cad',"#{comic_id}.jpg")
+  end
+
+  def get_latest_id
+    doc = Nokogiri::HTML(open(LATEST_URL))
+    doc.css('#content/img').first['src'].sub('/comics/cad/','').sub('.jpg','').to_i
+  end
+
+  def get_all_ids_since_last_saved
+    episodes = get_episodes_from_archive
+    until episodes.include?(last_saved_id)
+      year = episodes.first.to_s[0,4].to_i
+      older_episodes = get_episodes_from_archive(year - 1)
+      break if older_episodes == []
+      episodes = older_episodes + episodes
+    end
+    return episodes unless episodes.include?(last_saved_id)
+    episodes[(episodes.index(last_saved_id)+1)..-1]
+  end
+
+  private
+  def get_episodes_from_archive(year='')
+    doc = Nokogiri::HTML(open(File.join(ARCHIVE_URL,year.to_s)))
+    doc.css(".post/a").map{|a|a[:href].sub('/cad/','')}
   end
 end
 rt = ComicRetriever.new
