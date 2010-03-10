@@ -4,7 +4,7 @@ require 'nokogiri'
 require 'open-uri'
 class ComicRetriever
   CONFIG_URL = './comics.yaml'
-  attr_accessor :config, :comics
+  attr_accessor :config, :comics, :wget_background
   def config
     return @config if @config
     return @config = YAML.from_file(CONFIG_URL) if File.exist?(CONFIG_URL)
@@ -33,29 +33,31 @@ class ComicRetriever
     unless @comics
       comic_configs = config[:comics]
       @comics = comic_configs.map do |comic_class,comic_config|
-        Kernel.const_get(comic_class).new(comic_config)
+        Kernel.const_get(comic_class).new(comic_config,wget_background)
       end
     end
   end
   def retrieve_all
     comics.each do |comic|
+      puts "[#{Time.now.strftime('%H%M%S')}] Retrieving #{comic}"
       comic.get_all_since_last
     end
   end
 end
 
 class Comic
-  attr_accessor :url, :last_saved_id, :latest_id, :storage_path
-  def initialize(config)
+  attr_accessor :url, :last_saved_id, :latest_id, :storage_path, :wget_background
+  def initialize(config,wget_background=false)
     @url = config[:url]
     @last_saved_id = config[:last_saved_id]
     @storage_path = config[:storage_path]
     @latest_id = get_latest_id
+    @wget_background = wget_background
   end
 
   def retrieve_comic(comic_id)
     url = image_url(comic_id)
-    `wget -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
+    `wget #{'-b' if wget_background} -U "ComicRetrieveR -- http://github.com/FiXato/ComicRetrieveR" -P #{storage_path} #{url}` unless File.exist?(File.join(storage_path,File.basename(url)))
   end
 
   def get_all_ids_since_last_saved
@@ -141,4 +143,5 @@ class FreeFallComic < Comic
 end
 
 rt = ComicRetriever.new
+rt.wget_background = true if ARGV.include?('--wget-background')
 rt.retrieve_all
